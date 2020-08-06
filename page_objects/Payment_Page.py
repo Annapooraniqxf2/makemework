@@ -1,17 +1,8 @@
-"""
-This class models the form on contact page
-The form consists of some input fields.
-"""
-
 from .Base_Page import Base_Page
-import conf.locators_conf as locators
 from utils.Wrapit import Wrapit
+import conf.locators_conf as locators
 
-class Contact_Form_Object:
-    "Page object for the contact Form"
-
-    #locators
-    #contact_name_field = locators.contact_name_field
+class Payment_Page(Base_Page):
     FORM_EMAIL_ID = locators.FORM_EMAIL_ID
     FORM_ACCOUNT_NUMBER = locators.FORM_ACCOUNT_NUMBER
     FORM_EXPIRY_DATE =  locators.FORM_EXPIRY_DATE
@@ -21,14 +12,18 @@ class Contact_Form_Object:
     FORM_MOBILE = locators.FORM_MOBILE
     FORM_SUBMIT = locators.FORM_SUBMIT
 
-    @Wrapit._exceptionHandler
-    def set_name(self,name):
-        "Set the name on the Kick start form"
-        result_flag = self.set_text(self.contact_name_field,name)
+    def start(self):
+        "Switching to payment iframe"
+        self.switch_frame("iframe")
+
+    def click_pay_button(self):
+        "Click to the pay button"
+        result_flag = self.click_element(self.CART_PAY_BUTTON)
+        if result_flag:
+            self.switch_page("checkout")
         self.conditional_write(result_flag,
-            positive='Set the name to: %s'%name,
-            negative='Failed to set the name in the form',
-            level='debug')
+        positive="Clicked on the Pay with card button",
+        negative="Could not click on the Pay with card button")
 
         return result_flag
 
@@ -98,12 +93,12 @@ class Contact_Form_Object:
 
         return result_flag
 
-    @Wrapit._screenshot
-    def click_pay_button(self):
+    @Wrapit._exceptionHandler
+    def click_submit_button(self):
         "Click the pay button"
         result_flag = self.click_element(self.FORM_SUBMIT)
         self.conditional_write(result_flag,
-        positive="Clicked on the pay button",
-        negative="Could not click on the pay button")
+        positive="Clicked on the submit button",
+        negative="Could not click on the submit button")
 
         return result_flag

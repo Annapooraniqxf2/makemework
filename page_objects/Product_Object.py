@@ -10,8 +10,8 @@ class Product():
     "A product class"
     def __init__(self,name,price):
         "Set up the product with name and price"
-        self.name = name 
-        self.price = price 
+        self.name = name
+        self.price = price
 
 class Product_Object():
     "Page Object for the products object"
@@ -22,6 +22,7 @@ class Product_Object():
     CART_TITLE = locators.CART_TITLE
     CART_QUANTITY = 0
     PRODUCTS_PER_PAGE = 6
+
 
     def convert_str_to_int(self,string, default=100000, expect_fail=False):
         "Convert a given string to integer. Return default if you cannot convert"
@@ -40,7 +41,7 @@ class Product_Object():
         name = product_text.split(b"\n")[0].strip()
         name = name.decode('ascii')
 
-        return name 
+        return name
 
     @Wrapit._exceptionHandler
     def get_product_price(self,product_text):
@@ -56,7 +57,7 @@ class Product_Object():
     @Wrapit._screenshot
     def get_all_products_on_page(self):
         "Get all the products"
-        result_flag = False 
+        result_flag = False
         all_products = []
         product_list = self.get_elements(self.PRODUCTS_LIST)
         for i,product in enumerate(product_list):
@@ -65,13 +66,13 @@ class Product_Object():
             price = self.get_product_price(product_text)
             all_products.append(Product(name, price))
         if self.PRODUCTS_PER_PAGE == len(all_products):
-            result_flag = True 
+            result_flag = True
         self.conditional_write(result_flag,
         positive="Obtained all %d products from the page"%self.PRODUCTS_PER_PAGE,
         negative="Could not obtain all products. Automation got %d products while we expected %d products"%(len(all_products),self.PRODUCTS_PER_PAGE))
 
         return all_products
-    
+
     def print_all_products(self):
         "Print out all the products nicely"
         all_products = self.get_all_products_on_page()
@@ -81,23 +82,23 @@ class Product_Object():
 
     def get_minimum_priced_product(self,filter_condition):
         "Return the least expensive item based on a filter condition"
-        minimum_priced_product = None 
+        minimum_priced_product = None
         min_price = 10000000
         min_name = ''
         all_products = self.get_all_products_on_page()
         for product in all_products:
             if filter_condition.lower() in product.name.lower():
-                if product.price >= min_price:
+                if product.price <= min_price:
                     minimum_priced_product = product
                     min_price = product.price
-                    min_name = product.name 
-        result_flag = True if minimum_priced_product is not None else False 
+                    min_name = product.name
+        result_flag = True if minimum_priced_product is not None else False
         self.conditional_write(result_flag,
         positive="Min price for product with '%s' is %s with price %d"%(filter_condition,min_name,min_price),
         negative="Could not obtain the cheapest product with the filter condition '%s'\nCheck the screenshots to see if there was at least one item that satisfied the filter condition."%filter_condition)
 
         return minimum_priced_product
-            
+
     def click_add_product_button(self,product_name):
         "Click on the add button corresponding to the name"
         result_flag = self.click_element(self.ADD_PRODUCT_BUTTON%product_name)
@@ -118,15 +119,16 @@ class Product_Object():
         self.CART_QUANTITY = cart_quantity
         self.conditional_write(True,
         positive="The cart currently has %d items"%self.CART_QUANTITY,
-        negative="")
+        negative="There is nothing added to cart")
+
+        return cart_quantity
 
     def add_product(self,product_name):
         "Add the lowest priced product with the filter condition in name"
-        before_cart_quantity = self.get_current_cart_quantity() 
+        before_cart_quantity = self.get_current_cart_quantity()
         result_flag = self.click_add_product_button(product_name)
         after_cart_quantity = self.get_current_cart_quantity()
-        result_flag &= True if after_cart_quantity - before_cart_quantity == 1 else False 
-
+        result_flag &= True if after_cart_quantity - before_cart_quantity == 1 else False
         return result_flag
 
     @Wrapit._screenshot
@@ -147,7 +149,7 @@ class Product_Object():
         positive="Automation is on the Cart page",
         negative="Automation is not able to locate the Cart Title. Maybe it is not even on the cart page?")
         if result_flag:
-            self.switch_page("main")
+            self.switch_page("cart")
 
         return result_flag
 
